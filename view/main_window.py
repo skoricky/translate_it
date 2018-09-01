@@ -1,80 +1,49 @@
 # -*- coding: utf-8 -*-
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-# from PyQt5.QtCore import Qt, QObject, QThread, pyqtSignal, pyqtSlot
 import sys
-import os
 
 from ui_views.mainWindow import *
+from ui_views.info_boxes import *
+from translate_api import translate
+
 
 # для теста, потом убрать
 # ===========================================================
-a = r'Однажды весною, в час небывало жаркого заката, в Москве, на Патриарших прудах, появились два гражданина.'
-b = r'Первый был не кто иной, как Михаил Александрович Берлиоз, председатель правления одной из крупнейших московских' \
-    r' литературных ассоциаций, сокращенно именуемой МАССОЛИТ, и редактор толстого художественного журнала, а молодой' \
-    r' спутник его – поэт Иван Николаевич Понырев, пишущий под псевдонимом Бездомный.'
+a = '16 апреля 1928 года, вечером, профессор зоологии IV  государственного университета и директор зооинститута в  Москве,  Персиков,  вошел  в  свой кабинет, помещающийся в зооинституте,  что  на  улице  Герцена.  Профессор зажег верхний матовый шар и огляделся.'
+b = 'лдыоврапдл форвапдлыо рвдлпофрвларплдфворап лдфоврпдлфорвап'
 c = ''
-ao = 'The plot of the story is rather simple. Two people, a young one and an old one, lived together. The young' \
-     ' man helped the old man to keep the house. But with time the old man started to irritate the young. It was his' \
-     ' pale blue eye that made him mad.  What happpened in the end you will know when you read the story.'
-bo = 'Now this is the point. You think I am mad. But you should see me. You should see how wisely I started to' \
-     ' prepare for the work! I had been very kind to the old man during the whole week before. And every night, about' \
-     ' midnight, I opened his door— oh, so quietly! And then I put a dark lantern into the opening, all closed,' \
-     ' closed, so that no light shone out. And then I put in my head. Oh, you would laugh to see how carefully I put' \
-     ' my head in! I moved it slowly —very, very slowly so that I would not disturb the old man’s sleep.'
-co = 'On the eighth night I was more than usually careful in opening the door. I did it so slowly that a clock minute' \
-     ' hand moved more quickly than did mine. And I could not hide my feelings of triumph. Just imagine that I was' \
-     ' opening the door, little by little, and he didn’t even dream of my secret thoughts. I laughed at the idea; and' \
-     ' perhaps he heard me; for he moved on the bed suddenly. You may think that I got out — but no. It was very' \
-     ' dark in his room, for the shutters were closed, and so I knew that he could not see me, and I kept opening the' \
-     ' door on little by little.'
+ao = 'The plot of the story is rather simple. Two people, a young one and an old one, lived together. The young man helped the old man to keep the house. But with time the old man started to irritate the young. It was his pale blue eye that made him mad.  What happpened in the end you will know when you read the story.'
+bo = 'Now this is the point. You think I am mad. But you should see me. You should see how wisely I started to prepare for the work! I had been very kind to the old man during the whole week before. And every night, about midnight, I opened his door— oh, so quietly! And then I put a dark lantern into the opening, all closed, closed, so that no light shone out. And then I put in my head. Oh, you would laugh to see how carefully I put my head in! I moved it slowly —very, very slowly so that I would not disturb the old man’s sleep.'
+co = 'On the eighth night I was more than usually careful in opening the door. I did it so slowly that a clock minute hand moved more quickly than did mine. And I could not hide my feelings of triumph. Just imagine that I was opening the door, little by little, and he didn’t even dream of my secret thoughts. I laughed at the idea; and perhaps he heard me; for he moved on the bed suddenly. You may think that I got out — but no. It was very dark in his room, for the shutters were closed, and so I knew that he could not see me, and I kept opening the door on little by little.'
 
 orig = [ao, bo, co, ao, bo, co, ao, bo, co, c, c, c, c, c, c]
 transl = [a, b, a, b, a, b, a, b, c, a, b, c, a, b, c]
 tup = list(zip(orig, transl))
-print(tup)
 
 
 # =============================================================
 
 
-# TODO: класс для обмена информацией с внешними модулями
-class MainCommunicate(QtCore.QObject):
-    """
-    Communicate - пользовательские связи слот-сигнал с MainWindows
-    """
-
-    _sig_getblocks = QtCore.pyqtSignal(tuple)
-
-    def __init__(self):
-        super().__init__()
-        self.file_path = None
-
-    def get_blocks(self, data):
-        self._sig_getblocks.emit(data)
-
-    @QtCore.pyqtSlot(str)
-    def set_file_path(self, file_path):
-        self.file_path = file_path
-        # return file_path
+AUTO_SAVE_TIMEOUT = 1000 * 60 * 5
 
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     """ Главное окно.
         Ui_MainWindow - форма для setupUi"""
     _current_block = None
+    _project_changed = False  # при нажатии на save или auto-save меняется на False
 
-    # TODO: реализация сигналов во внешние модули, данные передаются с учетом типа данных
-    # Сигнал передающий блоки для загрузки в БД в формате ((original_data, translate_data))
-    _sig_setblocks = QtCore.pyqtSignal(tuple)
-    # Сигнал передающий путь к файлу при создании проекта
-    _sig_setfile_path = QtCore.pyqtSignal(str)
-
-    def __init__(self, controller=None, model=None, parent=None):
-        QtWidgets.QMainWindow.__init__(self, parent)
-        self.controller = controller
-        self.model = model
+    def __init__(self, paren=None):
+        QtWidgets.QMainWindow.__init__(self, paren)
         self.setupUi(self)
+        self.on_start()
+        self.info_box = MessageBoxes(self)
+
+        self.autosave_timer = QtCore.QTimer(self)
+        self.autosave_timer.setTimerType(QtCore.Qt.VeryCoarseTimer)
+        self.autosave_timer.start(AUTO_SAVE_TIMEOUT)
+        self.autosave_timer.timeout.connect(self.autosave)
 
         self.originalListWidget.itemClicked.connect(self.original_list_click)
         self.translatedListWidget.itemClicked.connect(self.translated_list_click)
@@ -84,15 +53,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.workWithBlockPushButton.clicked.connect(self.work_with_block)
         self.saveBlockPushButton.clicked.connect(self.save_block)
-        self.createToolButton.clicked.connect(self.create_new_project)
+        self.translateApiPushButton.clicked.connect(self.translate_word)
 
-        self.partner = MainCommunicate()
-        self._sig_setfile_path.connect(self.partner.set_file_path)
-        self.thread = QtCore.QThread()
-        self.partner.moveToThread(self.thread)
-        self.thread.start()
+        self.createTrigger.triggered.connect(self.create_new_project)
+        self.exportTxtTrigger.triggered.connect(self.export_txt)
+        self.exitToolButton.clicked.connect(self.close)
 
-        self.on_start()
+    # TODO: сюда добавить метод сохранения в базу
+    def autosave(self):
+        self._project_changed = False
 
     def sync_translated_scroll(self, value):
         self.translatedListWidget.verticalScrollBar().setValue(value)
@@ -114,11 +83,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.translatedListWidget.item(self._current_block).setText(self.translatedTextEdit.toPlainText())
         self.translatedPartStackedWidget.setCurrentWidget(self.listPage)
         self.workWithBlockPushButton.setEnabled(True)
+        self._project_changed = True
 
     # TODO: изменить когда будет метод выгрузки из базы
-    # TODO: добавил функцию-слот, при необходимости заменить
-    # функция-слот, которая со стороны GUI принимает tuple с блоками текста вида ((original_data, translate_data))
-    @QtCore.pyqtSlot(tuple)
     def add_text(self, list_of_tuples):
         for o, t in list_of_tuples:
             orig_item = QtWidgets.QListWidgetItem(o, self.originalListWidget)
@@ -126,15 +93,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.originalListWidget.addItem(orig_item)
             self.translatedListWidget.addItem(trans_item)
 
+    # TODO: когда будет выгрузка текста из базы - переработать под больший размер
     def align_text_blocks_height(self):
-        """ Выравнивает высоту блоков текста по большей, срабатывает при изменении размера окна"""
+        """ Выравнивает высоту блоков текста по тексту оригинала, срабатывает при изменении размера окна"""
         for string_index in range(self.translatedListWidget.count()):
             orig_index = self.originalListWidget.model().index(string_index)
-            transl_index = self.translatedListWidget.model().index(string_index)
             orig_height = self.originalListWidget.visualRect(orig_index).height()
-            transl_height = self.translatedListWidget.visualRect(transl_index).height()
-            self.originalListWidget.item(string_index).setSizeHint(QtCore.QSize(-1, max(orig_height, transl_height)))
-            self.translatedListWidget.item(string_index).setSizeHint(QtCore.QSize(-1, max(orig_height, transl_height)))
+            self.translatedListWidget.item(string_index).setSizeHint(QtCore.QSize(-1, orig_height))
 
     def original_list_click(self):
         """ Синхронизирует выделение блоков текста по клику на блок"""
@@ -144,10 +109,36 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """ Синхронизирует выделение блоков текста по клику на блок"""
         self.originalListWidget.setCurrentRow(self.translatedListWidget.currentRow())
 
+    def translate_word(self):
+        _PATTERN = 'оригинал: {} \n перевод: {}'
+        text = self.originalTextEdit.createMimeDataFromSelection().text()
+        if text:
+            translation = translate(text)
+            self.info_box('info', 'перевод', _PATTERN.format(text, translation))
+            QtWidgets.QApplication.clipboard().setText(translation)
+
+    def export_txt(self):
+        file = QtWidgets.QFileDialog.getSaveFileName(
+            parent=self, caption='Экспортировать', filter='All (*);;TXT (*.txt)', initialFilter='TXT (*.txt)'
+        )
+
+        # TODO: сюда вставить метод экспорта (пока тестовый способ)
+        if file[0]:
+            text = [self.translatedListWidget.item(i).text() for i in range(self.translatedListWidget.count())]
+            with open(file[0], 'a') as file:
+                for line in text:
+                    file.writelines([line, '\n'])
+
     # TODO: метод для теста, пока нет заливки из базы - потом убрать
     def on_start(self):
-        pass
-        # self.add_text(tup)
+        self.add_text(tup)
+
+    def create_new_project(self):
+        file = QtWidgets.QFileDialog.getOpenFileName(
+            parent=self, caption='Новый проект', filter='All (*);;TXT (*.txt)', initialFilter='TXT (*.txt)'
+        )
+        # путь к файлу который нужно прочитать
+        file_path = file[0]
 
     def resizeEvent(self, event):
         """ Переопределение метода изменения размера окна,
@@ -155,18 +146,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         event.accept()
         self.align_text_blocks_height()
 
-    def create_new_project(self):
-        file = QtWidgets.QFileDialog.getOpenFileName(
-            parent=self, caption='Новый проект', filter='All (*);;TXT (*.txt)', initialFilter='TXT (*.txt)'
-        )
-        # путь к файлу который нужно прочитать
-        file_path = os.path.abspath(file[0])
-        if file_path:
-            self._sig_setfile_path.emit(file_path)
-            print(self._sig_setfile_path)
-
     def closeEvent(self, event):
-        # диалоговое окно ... подумать где создавать экземпляр
+        if self._project_changed:
+            # диалоговое окно ... подумать где создавать экземпляр
+            answ = self.info_box('question', 'Выход', 'Сохранить изменения?')
+            if answ == QtWidgets.QMessageBox.Cancel:
+                event.ignore()
+
+            # TODO: сюда добавить метод сохранения в базу
+            elif answ == QtWidgets.QMessageBox.Yes:
+                event.accept()
+
+            elif answ == QtWidgets.QMessageBox.No:
+                event.accept()
+        else:
+            event.accept()
+
+    def showEvent(self, event):
+        self.align_text_blocks_height()
         event.accept()
 
 
