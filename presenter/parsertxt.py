@@ -7,22 +7,22 @@ class ParserText:
     {block_id -> int: data -> str}
     """
 
-    __PATTERN_TEXT = r'\n\s+'
+    PATTERN_TEXT = r'\n\s+'
 
     def __init__(self, text_string: str):
         self.text_string = text_string
 
-    def __parser_text(self, user_text: str) -> list:
+    def _parser_text(self, user_text: str) -> list:
         # проверяем наличие паттерна в тексте
-        if re.search(self.__PATTERN_TEXT, user_text):
+        if re.search(self.PATTERN_TEXT, user_text):
             # делаем split() по паттерну
-            split_text = re.split(self.__PATTERN_TEXT, user_text)
+            split_text = re.split(self.PATTERN_TEXT, user_text)
             # заменяем \n на пробел для тех случаев, когда \n остается после применения паттерна
             return [(re.sub(r'[\n]', ' ', i)).capitalize() for i in split_text]
         # возвращаем текст с заменой \n на пробелы, если паттерн не обнаружен
         return [re.sub(r'[\n]', ' ', user_text).capitalize()]
 
-    def __get_text(self) -> str:
+    def _get_text(self) -> str:
         try:
             # определяем, является ли пользовательский ввод file path
             with open(self.text_string, 'r', encoding='UTF-8') as file:
@@ -33,8 +33,8 @@ class ParserText:
             return self.text_string.strip()
 
     def get(self):
-        text = self.__get_text()
-        blocks_list = self.__parser_text(text)
+        text = self._get_text()
+        blocks_list = self._parser_text(text)
         return {blocks_list.index(i): i for i in blocks_list}
 
 

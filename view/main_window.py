@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+# from PyQt5.QtCore import Qt, QObject, QThread, pyqtSignal, pyqtSlot
 import sys
+import os
 
 from ui_views.mainWindow import *
 from ui_views.info_boxes import *
@@ -19,7 +21,7 @@ co = 'On the eighth night I was more than usually careful in opening the door. I
 
 orig = [ao, bo, co, ao, bo, co, ao, bo, co, c, c, c, c, c, c]
 transl = [a, b, a, b, a, b, a, b, c, a, b, c, a, b, c]
-tup = list(zip(orig, transl))
+tup = tuple(zip(orig, transl))
 
 
 # =============================================================
@@ -34,11 +36,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     _current_block = None
     _project_changed = False  # при нажатии на save или auto-save меняется на False
 
+    # set_project_name = QtCore.pyqtSignal(str)
+    set_file_path = QtCore.pyqtSignal(str)
+    # set_text_blocks = QtCore.pyqtSignal(tuple)
+
     def __init__(self, paren=None):
         QtWidgets.QMainWindow.__init__(self, paren)
         self.setupUi(self)
         self.on_start()
         self.info_box = MessageBoxes(self)
+
 
         self.autosave_timer = QtCore.QTimer(self)
         self.autosave_timer.setTimerType(QtCore.Qt.VeryCoarseTimer)
@@ -54,10 +61,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.workWithBlockPushButton.clicked.connect(self.work_with_block)
         self.saveBlockPushButton.clicked.connect(self.save_block)
         self.translateApiPushButton.clicked.connect(self.translate_word)
+        # self.set_file_path.connect(self.method)
 
         self.createTrigger.triggered.connect(self.create_new_project)
         self.exportTxtTrigger.triggered.connect(self.export_txt)
         self.exitToolButton.clicked.connect(self.close)
+
+    # def method(self, path_):
+    #     print(path_)
 
     # TODO: сюда добавить метод сохранения в базу
     def autosave(self):
@@ -101,6 +112,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             orig_height = self.originalListWidget.visualRect(orig_index).height()
             self.translatedListWidget.item(string_index).setSizeHint(QtCore.QSize(-1, orig_height))
 
+    @QtCore.pyqtSlot()
     def original_list_click(self):
         """ Синхронизирует выделение блоков текста по клику на блок"""
         self.translatedListWidget.setCurrentRow(self.originalListWidget.currentRow())
@@ -117,6 +129,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.info_box('info', 'перевод', _PATTERN.format(text, translation))
             QtWidgets.QApplication.clipboard().setText(translation)
 
+    # TODO: думаю, что этому не место тут, предлагаю возвращать путь к файлу, а все сохранение делалть в модели
+    # TODO: на уровне модели выгружать из базы, а потом в файл
     def export_txt(self):
         file = QtWidgets.QFileDialog.getSaveFileName(
             parent=self, caption='Экспортировать', filter='All (*);;TXT (*.txt)', initialFilter='TXT (*.txt)'
@@ -133,12 +147,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def on_start(self):
         self.add_text(tup)
 
+    @QtCore.pyqtSlot()
     def create_new_project(self):
         file = QtWidgets.QFileDialog.getOpenFileName(
             parent=self, caption='Новый проект', filter='All (*);;TXT (*.txt)', initialFilter='TXT (*.txt)'
         )
         # путь к файлу который нужно прочитать
         file_path = file[0]
+        if file_path:
+            self.set_file_path.emit(os.path.abspath(file_path))
 
     def resizeEvent(self, event):
         """ Переопределение метода изменения размера окна,
