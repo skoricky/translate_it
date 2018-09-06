@@ -1,37 +1,35 @@
-from abc import ABCMeta, abstractmethod, abstractproperty
+import json
 
 
-class AbsModel:
-    """
-    Абстрактный класс для описания стандартных методов для моделей
-    """
-    __metaclass__ = ABCMeta
+class TempRepository:
 
-    @abstractmethod
-    def get_blocks(self):
-        pass
+    __slots__ = ['file_name', 'data']
 
-    @abstractmethod
-    def set_blocks(self):
-        pass
+    def __init__(self, file_name, data):
+        self.file_name = file_name
+        self.data = data
 
-    @abstractmethod
-    def save_to_file(self):
-        pass
+    def dumps_tojson(self):
+        try:
+            with open(self.file_name, 'w') as file:
+                file.write(json.dumps(self.data))
+            print('done')
+        except Exception as e:
+            print('Error (so bad):', e)
+
+    def loads_fromjson(self):
+        try:
+            with open(self.file_name, 'r') as file:
+                data = dict(json.loads(file.read(), encoding='utf-8'))
+            print('done')
+            return data
+        except Exception as e:
+            print('Error (so bad):', e)
 
 
-class JsonModel(AbsModel):
-    def __init__(self):
-        pass
+class Repository(TempRepository):
 
-    def get_blocks(self):
-        pass
+    __slots__ = ['file_name', 'data']
 
-    def set_blocks(self):
-        pass
-
-    def get_project_id(self):
-        pass
-
-    def save_to_file(self):
-        pass
+    def __init__(self, file_name=None, data=None):
+        super().__init__(file_name, data)

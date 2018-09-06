@@ -10,7 +10,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from os.path import join, abspath
 
 
-ICONS_PATH = abspath("./ui_views/icons")
+ICONS_PATH = abspath(".\\view\\ui_views\\icons")
 SAVE_ICON = "save_ico.png"
 EXIT_ICON = "exit_ico.png"
 

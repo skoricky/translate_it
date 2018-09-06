@@ -7,7 +7,7 @@ import os
 
 from ui_views.mainWindow import *
 from ui_views.info_boxes import *
-from translate_api import translate
+# from translate_api import translate
 
 
 # для теста, потом убрать
@@ -21,7 +21,7 @@ co = 'On the eighth night I was more than usually careful in opening the door. I
 
 orig = [ao, bo, co, ao, bo, co, ao, bo, co, c, c, c, c, c, c]
 transl = [a, b, a, b, a, b, a, b, c, a, b, c, a, b, c]
-tup = tuple(zip(orig, transl))
+# tup = tuple(zip(orig, transl))
 
 
 # =============================================================
@@ -38,7 +38,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     # set_project_name = QtCore.pyqtSignal(str)
     set_file_path = QtCore.pyqtSignal(str)
-    # set_text_blocks = QtCore.pyqtSignal(tuple)
+    set_text_blocks = QtCore.pyqtSignal(tuple)
 
     def __init__(self, paren=None):
         QtWidgets.QMainWindow.__init__(self, paren)
@@ -61,14 +61,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.workWithBlockPushButton.clicked.connect(self.work_with_block)
         self.saveBlockPushButton.clicked.connect(self.save_block)
         self.translateApiPushButton.clicked.connect(self.translate_word)
+        self.saveToolButton.clicked.connect(self._save_text_blocks)
         # self.set_file_path.connect(self.method)
 
         self.createTrigger.triggered.connect(self.create_new_project)
         self.exportTxtTrigger.triggered.connect(self.export_txt)
         self.exitToolButton.clicked.connect(self.close)
-
-    # def method(self, path_):
-    #     print(path_)
 
     # TODO: сюда добавить метод сохранения в базу
     def autosave(self):
@@ -122,12 +120,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.originalListWidget.setCurrentRow(self.translatedListWidget.currentRow())
 
     def translate_word(self):
-        _PATTERN = 'оригинал: {} \n перевод: {}'
-        text = self.originalTextEdit.createMimeDataFromSelection().text()
-        if text:
-            translation = translate(text)
-            self.info_box('info', 'перевод', _PATTERN.format(text, translation))
-            QtWidgets.QApplication.clipboard().setText(translation)
+        pass
+        # _PATTERN = 'оригинал: {} \n перевод: {}'
+        # text = self.originalTextEdit.createMimeDataFromSelection().text()
+        # if text:
+        #     translation = translate(text)
+        #     self.info_box('info', 'перевод', _PATTERN.format(text, translation))
+        #     QtWidgets.QApplication.clipboard().setText(translation)
 
     # TODO: думаю, что этому не место тут, предлагаю возвращать путь к файлу, а все сохранение делалть в модели
     # TODO: на уровне модели выгружать из базы, а потом в файл
@@ -145,7 +144,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     # TODO: метод для теста, пока нет заливки из базы - потом убрать
     def on_start(self):
-        self.add_text(tup)
+        pass
+        # self.add_text(tup)
 
     @QtCore.pyqtSlot()
     def create_new_project(self):
@@ -183,6 +183,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.align_text_blocks_height()
         event.accept()
 
+
+    def _save_text_blocks(self):
+        text = ((self.originalListWidget.item(i).text(), self.translatedListWidget.item(i).text())
+                for i in range(self.translatedListWidget.count()))
+
+        self.set_text_blocks.emit(tuple(text))
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)

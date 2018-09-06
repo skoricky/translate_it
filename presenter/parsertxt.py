@@ -7,16 +7,18 @@ class ParserText:
     {block_id -> int: data -> str}
     """
 
-    PATTERN_TEXT = r'\n\s+'
+    PATTERN = r'\n\s+'
+
+    __slots__ = ['text_string']
 
     def __init__(self, text_string: str):
         self.text_string = text_string
 
     def _parser_text(self, user_text: str) -> list:
         # проверяем наличие паттерна в тексте
-        if re.search(self.PATTERN_TEXT, user_text):
+        if re.search(self.PATTERN, user_text):
             # делаем split() по паттерну
-            split_text = re.split(self.PATTERN_TEXT, user_text)
+            split_text = re.split(self.PATTERN, user_text)
             # заменяем \n на пробел для тех случаев, когда \n остается после применения паттерна
             return [(re.sub(r'[\n]', ' ', i)).capitalize() for i in split_text]
         # возвращаем текст с заменой \n на пробелы, если паттерн не обнаружен
@@ -32,11 +34,18 @@ class ParserText:
             # возвращаем пользовательский ввод без пробелов и табуляций в начале и в конце текста
             return self.text_string.strip()
 
-    def get(self):
+    def get_blocks_dict(self) -> dict:
         text = self._get_text()
         blocks_list = self._parser_text(text)
         return {blocks_list.index(i): i for i in blocks_list}
 
+    def convert_to_dict(self, data: tuple) -> dict:
+        dict_ = {}
+        for idx, item in enumerate(data):
+            dict_.update({idx: item})
+        return dict_
+
 
 if __name__ == '__main__':
-    print(ParserText('Пошел на\nхуй.\n не балуйся, а то мы тебя накажем.\n  С уважением, Правообладатели.').get())
+    print(ParserText('Пошел на\nхуй.\n не балуйся, а то мы тебя накажем.\n  '
+                     'С уважением, Правообладатели.').get_blocks_dict())
