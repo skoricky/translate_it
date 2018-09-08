@@ -39,6 +39,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # set_project_name = QtCore.pyqtSignal(str)
     set_file_path = QtCore.pyqtSignal(str)
     set_text_blocks = QtCore.pyqtSignal(tuple)
+    dump_to_file = QtCore.pyqtSignal(list, str)
 
     def __init__(self, paren=None):
         QtWidgets.QMainWindow.__init__(self, paren)
@@ -62,7 +63,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.saveBlockPushButton.clicked.connect(self.save_block)
         self.translateApiPushButton.clicked.connect(self.translate_word)
         self.saveToolButton.clicked.connect(self._save_text_blocks)
-        # self.set_file_path.connect(self.method)
 
         self.createTrigger.triggered.connect(self.create_new_project)
         self.exportTxtTrigger.triggered.connect(self.export_txt)
@@ -138,9 +138,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # TODO: сюда вставить метод экспорта (пока тестовый способ)
         if file[0]:
             text = [self.translatedListWidget.item(i).text() for i in range(self.translatedListWidget.count())]
-            with open(file[0], 'a') as file:
-                for line in text:
-                    file.writelines([line, '\n'])
+            self.dump_to_file.emit(text, file[0])
+            # with open(file[0], 'a') as file:
+            #     for line in text:
+            #         file.writelines([line, '\n'])
 
     # TODO: метод для теста, пока нет заливки из базы - потом убрать
     def on_start(self):
@@ -183,12 +184,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.align_text_blocks_height()
         event.accept()
 
-
     def _save_text_blocks(self):
         text = ((self.originalListWidget.item(i).text(), self.translatedListWidget.item(i).text())
                 for i in range(self.translatedListWidget.count()))
 
         self.set_text_blocks.emit(tuple(text))
+
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
