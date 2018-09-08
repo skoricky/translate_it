@@ -1,4 +1,4 @@
-# from parsertxt import ParserText
+from parsertxt import ParserText
 
 
 class Presenter(object):
@@ -7,22 +7,29 @@ class Presenter(object):
         self._model = model
         self._view = view
         self._view.set_text_blocks.connect(self.set_blocks)
-        self._view.set_file_path.connect(self.get_blocks)
+        self._view.set_file_path.connect(self.loadfrom_file)
+        self._view.dump_to_file.connect(self.dumpto_file)
 
-    def get_blocks(self, file_name='Hello.json'):
-        self._model.file_name = file_name
-        data = self._model.loads_fromjson()
+    def get_blocks(self):
+        data = self._model.get_data()
         data_tuple = (data[i] for i in data.keys())
         self._view.add_text(data_tuple)
 
-    def set_blocks(self, data, file_name='Hello.json'):
+    def set_blocks(self, data):
         data_dict = {}
         for idx, item in enumerate(data):
             data_dict.update({idx: item})
         self._model.data = data_dict
-        self._model.file_name = file_name
-        self._model.dumps_tojson()
+        self._model.set_data()
 
-    def set_file_path(self, path_):
-        print(path_)
+    def dumpto_file(self, data, file_name):
+        data_str = ParserText.convert_to_str(data)
+        self._model.file_name = file_name
+        self._model.data = data_str
+        self._model.dumpto_file()
+
+    def loadfrom_file(self, file_name):
+        data = ParserText(file_name).get_blocks_dict()
+        data_tuple = ((data[i], '') for i in data.keys())
+        self._view.add_text(data_tuple)
 
