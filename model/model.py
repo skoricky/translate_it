@@ -1,4 +1,47 @@
 import json
+from abc import ABCMeta, abstractmethod, abstractproperty
+
+
+class AbsModel:
+    """
+    Абстрактный класс для описания стандартных методов для моделей
+    """
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def get_blocks(self):
+        pass
+
+    @abstractmethod
+    def set_blocks(self):
+        pass
+
+    @abstractmethod
+    def dumpto_file(self):
+        pass
+		
+
+class SQLiteRepository(AbsModel):
+	def __init__(self, file_name,data):
+		self.file_name = file_name
+		self.data = data
+		
+	def create_project(self, projet_name):
+		pass
+		
+	def get_data(self):
+		pass
+		
+	def set_data(self):
+		pass
+		
+	def dumpto_file(self):
+		try:
+			with open(self.file_name, "r") as file:
+				file.write(self.data)
+			return True	
+		except Exception as e:
+			print('Error (so bad):', e)
 
 
 class TempRepository:
