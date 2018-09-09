@@ -121,9 +121,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # _PATTERN = 'оригинал: {} \n перевод: {}'
         # text = self.originalTextEdit.createMimeDataFromSelection().text()
         # if text:
-        #     translation = translate(text)
-        #     self.info_box('info', 'перевод', _PATTERN.format(text, translation))
-        #     QtWidgets.QApplication.clipboard().setText(translation)
+        #     type_, desc_, text_ = translate(text)
+        #     if type_ == 'info':
+        #         self.info_box(type_, desc_, _PATTERN.format(text, text_))
+        #         QtWidgets.QApplication.clipboard().setText(text_)
+        #     else:
+        #         self.info_box(type_, desc_, text_)
 
     def export_txt(self):
         """
@@ -171,6 +174,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             # TODO: сюда добавить метод сохранения в базу
             elif answ == QtWidgets.QMessageBox.Yes:
+                self._save_project()
                 event.accept()
 
             elif answ == QtWidgets.QMessageBox.No:
