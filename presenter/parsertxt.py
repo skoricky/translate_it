@@ -39,11 +39,9 @@ class ParserText:
         blocks_list = self._parser_text(text)
         return {blocks_list.index(i): i for i in blocks_list}
 
-    def convert_to_dict(self, data: tuple) -> dict:
-        dict_ = {}
-        for idx, item in enumerate(data):
-            dict_.update({idx: item})
-        return dict_
+    @staticmethod
+    def convert_to_str(data) -> str:
+        return '\n\t'.join(i for i in data).strip()
 
 
 if __name__ == '__main__':
