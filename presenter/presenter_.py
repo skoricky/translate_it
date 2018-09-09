@@ -7,7 +7,7 @@ class Presenter(object):
         self._model = model
         self._view = view
         self._view.set_text_blocks.connect(self.set_blocks)
-        self._view.set_file_path.connect(self.loadfrom_file)
+        self._view.load_from_file.connect(self.loadfrom_file)
         self._view.dump_to_file.connect(self.dumpto_file)
 
     def get_blocks(self):

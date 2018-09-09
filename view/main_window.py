@@ -7,6 +7,7 @@ import os
 
 from ui_views.mainWindow import *
 from ui_views.info_boxes import *
+
 # from translate_api import translate
 
 
@@ -37,7 +38,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     _project_changed = False  # при нажатии на save или auto-save меняется на False
 
     # set_project_name = QtCore.pyqtSignal(str)
-    set_file_path = QtCore.pyqtSignal(str)
+    load_from_file = QtCore.pyqtSignal(str)
     set_text_blocks = QtCore.pyqtSignal(tuple)
     dump_to_file = QtCore.pyqtSignal(list, str)
 
@@ -46,7 +47,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.on_start()
         self.info_box = MessageBoxes(self)
-
 
         self.autosave_timer = QtCore.QTimer(self)
         self.autosave_timer.setTimerType(QtCore.Qt.VeryCoarseTimer)
@@ -65,6 +65,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.saveToolButton.clicked.connect(self._save_text_blocks)
 
         self.createTrigger.triggered.connect(self.create_new_project)
+        self.openTrigger.triggered.connect(self.open_project)
         self.exportTxtTrigger.triggered.connect(self.export_txt)
         self.exitToolButton.clicked.connect(self.close)
 
@@ -128,20 +129,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #     self.info_box('info', 'перевод', _PATTERN.format(text, translation))
         #     QtWidgets.QApplication.clipboard().setText(translation)
 
-    # TODO: думаю, что этому не место тут, предлагаю возвращать путь к файлу, а все сохранение делалть в модели
-    # TODO: на уровне модели выгружать из базы, а потом в файл
     def export_txt(self):
+        """
+        Метод экспорта в TXT
+        :return: list перевода и path для сохранения
+        """
         file = QtWidgets.QFileDialog.getSaveFileName(
             parent=self, caption='Экспортировать', filter='All (*);;TXT (*.txt)', initialFilter='TXT (*.txt)'
         )
-
-        # TODO: сюда вставить метод экспорта (пока тестовый способ)
         if file[0]:
             text = [self.translatedListWidget.item(i).text() for i in range(self.translatedListWidget.count())]
             self.dump_to_file.emit(text, file[0])
-            # with open(file[0], 'a') as file:
-            #     for line in text:
-            #         file.writelines([line, '\n'])
 
     # TODO: метод для теста, пока нет заливки из базы - потом убрать
     def on_start(self):
@@ -156,7 +154,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # путь к файлу который нужно прочитать
         file_path = file[0]
         if file_path:
-            self.set_file_path.emit(os.path.abspath(file_path))
+            self.load_from_file.emit(os.path.abspath(file_path))
+
+    @QtCore.pyqtSlot()
+    def open_project(self):
+        pass
 
     def resizeEvent(self, event):
         """ Переопределение метода изменения размера окна,
