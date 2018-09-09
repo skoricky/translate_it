@@ -7,7 +7,7 @@ import os
 from view.ui_views.mainWindow import Ui_MainWindow
 from view.ui_views.info_boxes import MessageBoxes
 
-# from translate_api import translate
+from view.translate_api import translate
 
 
 # для теста, потом убрать
@@ -117,16 +117,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.originalListWidget.setCurrentRow(self.translatedListWidget.currentRow())
 
     def translate_word(self):
-        pass
-        # _PATTERN = 'оригинал: {} \n перевод: {}'
-        # text = self.originalTextEdit.createMimeDataFromSelection().text()
-        # if text:
-        #     type_, desc_, text_ = translate(text)
-        #     if type_ == 'info':
-        #         self.info_box(type_, desc_, _PATTERN.format(text, text_))
-        #         QtWidgets.QApplication.clipboard().setText(text_)
-        #     else:
-        #         self.info_box(type_, desc_, text_)
+        _PATTERN = 'оригинал: {} \n перевод: {}'
+        text = self.originalTextEdit.createMimeDataFromSelection().text()
+        if text:
+            type_, desc_, text_ = translate(text)
+            if type_ == 'info':
+                self.info_box(type_, desc_, _PATTERN.format(text, text_))
+                QtWidgets.QApplication.clipboard().setText(text_)
+            else:
+                self.info_box(type_, desc_, text_)
 
     def export_txt(self):
         """
