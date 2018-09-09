@@ -1,16 +1,10 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '.\mainWindow.ui'
-#
-# Created by: PyQt5 UI code generator 5.11.2
-#
-# WARNING! All changes made in this file will be lost!
-
 from PyQt5 import QtCore, QtGui, QtWidgets
 from os.path import join, abspath
 
 
-ICONS_PATH = abspath(".\\view\\ui_views\\icons")
+ICONS_PATH = abspath("./view/ui_views/icons")
 SAVE_ICON = "save_ico.png"
 EXIT_ICON = "exit_ico.png"
 

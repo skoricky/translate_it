@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-# from PyQt5.QtCore import Qt, QObject, QThread, pyqtSignal, pyqtSlot
 import sys
 import os
 
-from ui_views.mainWindow import *
-from ui_views.info_boxes import *
+from view.ui_views.mainWindow import Ui_MainWindow
+from view.ui_views.info_boxes import MessageBoxes
 
 # from translate_api import translate
 
@@ -51,7 +50,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.autosave_timer = QtCore.QTimer(self)
         self.autosave_timer.setTimerType(QtCore.Qt.VeryCoarseTimer)
         self.autosave_timer.start(AUTO_SAVE_TIMEOUT)
-        self.autosave_timer.timeout.connect(self.autosave)
+        self.autosave_timer.timeout.connect(self._save_project)
 
         self.originalListWidget.itemClicked.connect(self.original_list_click)
         self.translatedListWidget.itemClicked.connect(self.translated_list_click)
@@ -62,16 +61,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.workWithBlockPushButton.clicked.connect(self.work_with_block)
         self.saveBlockPushButton.clicked.connect(self.save_block)
         self.translateApiPushButton.clicked.connect(self.translate_word)
-        self.saveToolButton.clicked.connect(self._save_text_blocks)
 
         self.createTrigger.triggered.connect(self.create_new_project)
         self.openTrigger.triggered.connect(self.open_project)
         self.exportTxtTrigger.triggered.connect(self.export_txt)
         self.exitToolButton.clicked.connect(self.close)
-
-    # TODO: сюда добавить метод сохранения в базу
-    def autosave(self):
-        self._project_changed = False
+        self.saveToolButton.clicked.connect(self._save_project)
+        self.saveTrigger.triggered.connect(self._save_project)
 
     def sync_translated_scroll(self, value):
         self.translatedListWidget.verticalScrollBar().setValue(value)
@@ -186,11 +182,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.align_text_blocks_height()
         event.accept()
 
-    def _save_text_blocks(self):
+    def _save_project(self):
         text = ((self.originalListWidget.item(i).text(), self.translatedListWidget.item(i).text())
                 for i in range(self.translatedListWidget.count()))
 
         self.set_text_blocks.emit(tuple(text))
+        self._project_changed = False
 
 
 if __name__ == '__main__':
