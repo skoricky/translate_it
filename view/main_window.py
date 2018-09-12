@@ -36,7 +36,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     _current_block = None
     _project_changed = False  # при нажатии на save или auto-save меняется на False
 
-    # set_project_name = QtCore.pyqtSignal(str)
+    open_cur_project = QtCore.pyqtSignal(str)
     load_from_file = QtCore.pyqtSignal(str)
     set_text_blocks = QtCore.pyqtSignal(tuple)
     dump_to_file = QtCore.pyqtSignal(list, str)
@@ -155,8 +155,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.load_from_file.emit(os.path.abspath(file_path))
 
     @QtCore.pyqtSlot()
-    def open_project(self):
-        pass
+    def open_project(self, project_name='Hello'):
+        self.open_cur_project.emit(project_name)
 
     def resizeEvent(self, event):
         """ Переопределение метода изменения размера окна,

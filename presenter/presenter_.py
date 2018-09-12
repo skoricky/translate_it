@@ -9,9 +9,10 @@ class Presenter(object):
         self._view.set_text_blocks.connect(self.set_blocks)
         self._view.load_from_file.connect(self.loadfrom_file)
         self._view.dump_to_file.connect(self.dumpto_file)
+        self._view.open_cur_project.connect(self.open_project)
 
-    def get_blocks(self):
-        data = self._model.get_data()
+    def get_blocks(self, data: dict):
+        # data = self._model.get_data()
         data_tuple = (data[i] for i in data.keys())
         self._view.add_text(data_tuple)
 
@@ -32,4 +33,8 @@ class Presenter(object):
         data = ParserText(file_name).get_blocks_dict()
         data_tuple = ((data[i], '') for i in data.keys())
         self._view.add_text(data_tuple)
+
+    def open_project(self, project_name):
+        data = self._model.open_project(project_name)
+        self.get_blocks(data)
 
