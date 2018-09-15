@@ -98,6 +98,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             trans_item = QtWidgets.QListWidgetItem(t, self.translatedListWidget)
             self.originalListWidget.addItem(orig_item)
             self.translatedListWidget.addItem(trans_item)
+        self.align_text_blocks_height()
 
     # TODO: когда будет выгрузка текста из базы - переработать под больший размер
     def align_text_blocks_height(self):
