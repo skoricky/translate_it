@@ -9,24 +9,6 @@ from view.ui_views.info_boxes import MessageBoxes
 
 from view.translate_api import translate
 
-
-# для теста, потом убрать
-# ===========================================================
-a = '16 апреля 1928 года, вечером, профессор зоологии IV  государственного университета и директор зооинститута в  Москве,  Персиков,  вошел  в  свой кабинет, помещающийся в зооинституте,  что  на  улице  Герцена.  Профессор зажег верхний матовый шар и огляделся.'
-b = 'лдыоврапдл форвапдлыо рвдлпофрвларплдфворап лдфоврпдлфорвап'
-c = ''
-ao = 'The plot of the story is rather simple. Two people, a young one and an old one, lived together. The young man helped the old man to keep the house. But with time the old man started to irritate the young. It was his pale blue eye that made him mad.  What happpened in the end you will know when you read the story.'
-bo = 'Now this is the point. You think I am mad. But you should see me. You should see how wisely I started to prepare for the work! I had been very kind to the old man during the whole week before. And every night, about midnight, I opened his door— oh, so quietly! And then I put a dark lantern into the opening, all closed, closed, so that no light shone out. And then I put in my head. Oh, you would laugh to see how carefully I put my head in! I moved it slowly —very, very slowly so that I would not disturb the old man’s sleep.'
-co = 'On the eighth night I was more than usually careful in opening the door. I did it so slowly that a clock minute hand moved more quickly than did mine. And I could not hide my feelings of triumph. Just imagine that I was opening the door, little by little, and he didn’t even dream of my secret thoughts. I laughed at the idea; and perhaps he heard me; for he moved on the bed suddenly. You may think that I got out — but no. It was very dark in his room, for the shutters were closed, and so I knew that he could not see me, and I kept opening the door on little by little.'
-
-orig = [ao, bo, co, ao, bo, co, ao, bo, co, c, c, c, c, c, c]
-transl = [a, b, a, b, a, b, a, b, c, a, b, c, a, b, c]
-# tup = tuple(zip(orig, transl))
-
-
-# =============================================================
-
-
 AUTO_SAVE_TIMEOUT = 1000 * 60 * 5
 
 
@@ -44,9 +26,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self, paren=None):
         QtWidgets.QMainWindow.__init__(self, paren)
         self.setupUi(self)
-        self.on_start()
         self.info_box = MessageBoxes(self)
 
+        # Таймер автосохранения, по истичению запускает метод _save_project, длительность задает AUTO_SAVE_TIMEOUT
         self.autosave_timer = QtCore.QTimer(self)
         self.autosave_timer.setTimerType(QtCore.Qt.VeryCoarseTimer)
         self.autosave_timer.start(AUTO_SAVE_TIMEOUT)
@@ -83,6 +65,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.originalTextEdit.setPlainText(self.originalListWidget.currentItem().text())
         self.translatedTextEdit.setPlainText(self.translatedListWidget.currentItem().text())
         self.workWithBlockPushButton.setEnabled(False)
+        # self.translatedTextEdit.setFocus()
 
     def save_block(self):
         """ Сохранение измененного текста блока в item. Срабатывает при нажатии кнопки 'Сохранить блок'. """
@@ -140,21 +123,25 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             text = [self.translatedListWidget.item(i).text() for i in range(self.translatedListWidget.count())]
             self.dump_to_file.emit(text, file[0])
 
-    # TODO: метод для теста, пока нет заливки из базы - потом убрать
-    def on_start(self):
-        pass
-        # self.add_text(tup)
-
     @QtCore.pyqtSlot()
     def create_new_project(self):
-        file = QtWidgets.QFileDialog.getOpenFileName(
-            parent=self, caption='Новый проект', filter='All (*);;TXT (*.txt)', initialFilter='TXT (*.txt)'
+        # имя для нового проекта
+        new_project_name, _create = QtWidgets.QInputDialog.getText(
+            self, 'Новый проект', 'Введите имя для нового проекта'
         )
-        # путь к файлу который нужно прочитать
-        file_path = file[0]
-        if file_path:
-            self.load_from_file.emit(os.path.abspath(file_path))
+        if _create:
+            if new_project_name:
+                # путь к файлу
+                file_path, _ = QtWidgets.QFileDialog.getOpenFileName(
+                    parent=self, caption='Новый проект', filter='All (*);;TXT (*.txt)', initialFilter='TXT (*.txt)'
+                )
+                if file_path:
+                    self.load_from_file.emit(os.path.abspath(file_path))
+            else:
+                self.info_box('info', 'имя', 'введите имя для проекта')
+                self.create_new_project()
 
+    # TODO: выгрузка из базы списка проектов, + поиск по проектам... список/аккардеон/дерево?
     @QtCore.pyqtSlot()
     def open_project(self, project_name='Hello'):
         self.open_cur_project.emit(project_name)
@@ -172,7 +159,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if answ == QtWidgets.QMessageBox.Cancel:
                 event.ignore()
 
-            # TODO: сюда добавить метод сохранения в базу
             elif answ == QtWidgets.QMessageBox.Yes:
                 self._save_project()
                 event.accept()

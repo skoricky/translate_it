@@ -4,7 +4,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from os.path import join, abspath
 
 
-ICONS_PATH = abspath("./ui_views/icons")
+ICONS_PATH = abspath("./view/ui_views/icons")
 SAVE_ICON = "save_ico.png"
 EXIT_ICON = "exit_ico.png"
 
@@ -156,7 +156,7 @@ class Ui_MainWindow(object):
         self.saveToolButton.setText(_translate("MainWindow", "..."))
         self.exitToolButton.setText(_translate("MainWindow", "..."))
         self.saveBlockPushButton.setText(_translate("MainWindow", "Сохранить блок"))
-        self.translateApiPushButton.setText(_translate("MainWindow", "Перевести"))
+        self.translateApiPushButton.setText(_translate("MainWindow", "online перевод"))
         self.workWithBlockPushButton.setText(_translate("MainWindow", "Перевести блок"))
         self.menu.setTitle(_translate("MainWindow", "Меню"))
         self.menu_2.setTitle(_translate("MainWindow", "Экспорт"))

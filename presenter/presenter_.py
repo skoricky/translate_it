@@ -1,4 +1,4 @@
-from parsertxt import ParserText
+from presenter.parsertxt import ParserText
 
 
 class Presenter(object):
