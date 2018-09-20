@@ -1,7 +1,7 @@
 import sys
 
 from PyQt5 import QtWidgets
-from presenter.presenter_ import Presenter
+from presenter.presenter import Presenter
 from view.main_window import MainWindow
 from model.model import Repository
 
