@@ -1,6 +1,6 @@
 from presenter.parsertxt import ParserText
 
-
+# TODO: в большой степени методы носят тестовый характер. Изменим при реализации базы
 class Presenter(object):
 
     def __init__(self, view, model):
@@ -10,6 +10,12 @@ class Presenter(object):
         self._view.load_from_file.connect(self.loadfrom_file)
         self._view.dump_to_file.connect(self.dumpto_file)
         self._view.open_cur_project.connect(self.open_project)
+        self._view.create_project.connect(self.create_project)
+    # TODO: тестовый вариант, нужно продумать при реализации базы
+    def create_project(self, *args):
+        print(args)
+        self._model.file_name = args[3]
+        self.get_blocks(self._model.get_data())
 
     def get_blocks(self, data: dict):
         # data = self._model.get_data()
