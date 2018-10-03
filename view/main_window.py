@@ -7,6 +7,7 @@ import os
 from view.ui_views.mainWindow import Ui_MainWindow
 from view.ui_views.info_boxes import MessageBoxes
 from view.ui_views.create_project_dialog import CreateProjectDialogWindow
+from view.ui_views.open_project_dialog import OpenProjectDialogWindow
 
 from view.translate_api import translate
 
@@ -137,7 +138,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     # TODO: выгрузка из базы списка проектов, + поиск по проектам... список/аккардеон/дерево?
     @QtCore.pyqtSlot()
     def open_project(self, project_name='Hello'):
+        open_project_dialog = OpenProjectDialogWindow(self)
+        open_project_dialog.show()
+        # возвращать имя или передавать сигналом? (сейчас сигналом)
         self.open_cur_project.emit(project_name)
+
+    def ppp(self, stt):
+        print(stt)
 
     def resizeEvent(self, event):
         """ Переопределение метода изменения размера окна,
