@@ -105,14 +105,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def translate_word(self):
         _PATTERN = 'оригинал: {} \n перевод: {}'
-        text = self.originalTextEdit.createMimeDataFromSelection().text()
-        if text:
-            type_, desc_, text_ = translate(text)
-            if type_ == 'info':
-                self.info_box(type_, desc_, _PATTERN.format(text, text_))
+        selection = self.originalTextEdit.createMimeDataFromSelection().text()
+
+        type_, desc_, text_ = translate(selection) if selection else translate(self.originalTextEdit.toPlainText())
+        if type_ == 'info':
+            if selection:
+                self.info_box(type_, desc_, _PATTERN.format(selection, text_))
                 QtWidgets.QApplication.clipboard().setText(text_)
             else:
-                self.info_box(type_, desc_, text_)
+                self.translatedTextEdit.setPlainText(text_)
+
+        else:
+            self.info_box(type_, desc_, text_)
 
     def export_txt(self):
         """
