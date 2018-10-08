@@ -7,7 +7,7 @@ import sqlite3
 # TODO: некоторые методы я переписал, чтобы просто опробовать связи, нужно еще раз связываться и уже допиливать
 class CDataBase:
     def __init__(self):
-        self.conn = sqlite3.connect("tiy.db")
+        self.conn = sqlite3.connect("D:\\Projects\\translate_it_now\\tiy.db")
         self.cursor = self.conn.cursor()
 
     def create_table_local_projects(self):
@@ -80,14 +80,21 @@ class CDataBase:
                             'delete from book_ru where prj_id = :prj_id;', prj_id)
         self.conn.commit()
 
+    def get_project_id(self, prj_name):
+        try:
+            self.cursor.execute('select prj_id from local_projects where prj_name = :prj_name', (prj_name,))
+            return self.cursor.fetchone()
+        except Exception as e:
+            print(e)
+
     def get_few_block_en(self, prj_name, blk_begin=None, blk_end=None):
         try:
-            self.cursor.execute(f'select prj_id from local_projects where prj_name = \'{prj_name}\'')
-            prj_id = self.cursor.fetchone()[0]
-            self.cursor.execute(f'select en_text from book_en where prj_id = \'{prj_id}\'')
+            prj_id = self.get_project_id(prj_name)[0]
+            self.cursor.execute('select en_text from book_en where prj_id = :prj_id', (prj_id,))
 
-            if self.cursor.fetchall():
-                return self.cursor.fetchall()
+            fetch = tuple(self.cursor.fetchall())
+            if len(fetch):
+                return fetch
             else:
                 return None
         except Exception as e:
@@ -99,7 +106,7 @@ class CDataBase:
             prj_id = self.cursor.fetchone()[0]
             self.cursor.execute(f'select ru_text from book_ru where prj_id = \'{prj_id}\'')
 
-            if self.cursor.fetchall():
+            if self.cursor.rowcount > 0:
                 return self.cursor.fetchall()
             else:
                 return None
@@ -146,3 +153,5 @@ if __name__ == '__main__':
     a = CDataBase()
     # a.set_project('python', 'Guido', 'python.org')
     print(a.get_project_names())
+    print(a.get_project_id('python'))
+    print(a.get_few_block_en('goo'))

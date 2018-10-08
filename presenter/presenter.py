@@ -11,23 +11,20 @@ class Presenter(object):
         self._view.dump_to_file.connect(self.dumpto_file)
         self._view.open_cur_project.connect(self.open_project)
         self._view.create_project.connect(self.create_project)
-    # TODO: тестовый вариант, нужно продумать при реализации базы
-    def create_project(self, *args):
-        print(args)
-        self._model.file_name = args[3]
-        self.get_blocks(self._model.get_data())
 
-    def get_blocks(self, data: dict):
+    def create_project(self, dict_):
+        self._model.create_project(**dict_)
+        self.loadfrom_file(dict_['file_path'])
+
+    def get_blocks(self, data: tuple):
         # data = self._model.get_data()
-        data_tuple = (data[i] for i in data.keys())
-        self._view.add_text(data_tuple)
+        self._view.add_text(data)
 
     def set_blocks(self, data):
-        data_dict = {}
-        for idx, item in enumerate(data):
-            data_dict.update({idx: item})
-        self._model.data = data_dict
-        self._model.set_data()
+        # data_dict = {}
+        # for idx, item in enumerate(data):
+        #     data_dict.update({idx: item})
+        self._model.set_data(data)
 
     def dumpto_file(self, data, file_name):
         data_str = ParserText.convert_to_str(data)
@@ -37,10 +34,12 @@ class Presenter(object):
 
     def loadfrom_file(self, file_name):
         data = ParserText(file_name).get_blocks_dict()
+        print(data)
         data_tuple = ((data[i], '') for i in data.keys())
         self._view.add_text(data_tuple)
 
     def open_project(self, project_name):
         data = self._model.open_project(project_name)
-        self.get_blocks(data)
+        if data is not None:
+            self.get_blocks(data)
 
