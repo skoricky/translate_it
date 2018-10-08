@@ -55,7 +55,7 @@ class SQLiteRepository(AbsModel):
         self.db_ = conn_db.CDataBase()
         self.project_name = None
         self.project_id = None
-        self.project_names = None
+        self.projects_names = None
 
     def create_project(self, **kwargs):
         print(kwargs)
@@ -74,9 +74,13 @@ class SQLiteRepository(AbsModel):
     def get_project_id(self):
         return self.db_.get_project_id(self.project_name)
 
+    def get_projects_names(self):
+        self.projects_names = self.db_.get_projects_names()
+        return self.projects_names
+
     def get_data(self):
-        en_ = self.db_.get_few_block_en(self.project_name)
-        ru_ = self.db_.get_few_block_ru(self.project_name)
+        en_ = self.db_.get_few_block_en(self.project_id)
+        ru_ = self.db_.get_few_block_ru(self.project_id)
         return tuple((en_[i], ru_[i]) for i in en_)
 
     def set_data(self, data: tuple):
@@ -84,8 +88,8 @@ class SQLiteRepository(AbsModel):
         for idx, i in enumerate(data):
             print('en', i[0])
             print('ru', i[1])
-            self.db_.set_en_text(prj_name=self.project_name, block_id=idx, en_text=i[0])
-            self.db_.set_ru_text(prj_name=self.project_name, block_id=idx, ru_text=i[1])
+            self.db_.set_en_text(prj_id=self.project_id, block_id=idx, en_text=i[0])
+            self.db_.set_ru_text(prj_id=self.project_id, block_id=idx, ru_text=i[1])
 
 
 class TempRepository(AbsModel):
