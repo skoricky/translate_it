@@ -25,8 +25,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     load_from_file = QtCore.pyqtSignal(str)
     set_text_blocks = QtCore.pyqtSignal(tuple)
     dump_to_file = QtCore.pyqtSignal(list, str)
-    create_project = QtCore.pyqtSignal(dict)  # ?
-    delete_project = QtCore.pyqtSignal(dict)  # ?
+    create_project = QtCore.pyqtSignal(dict)
+    delete_project = QtCore.pyqtSignal(str)
+    get_projects_names = QtCore.pyqtSignal()
 
     def __init__(self, paren=None):
         QtWidgets.QMainWindow.__init__(self, paren)
@@ -50,7 +51,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.translateApiPushButton.clicked.connect(self.translate_word)
 
         self.createTrigger.triggered.connect(self.create_new_project)
-        self.openTrigger.triggered.connect(self.open_project)
+        self.openTrigger.triggered.connect(self.open_project_triggered)
         self.deleteTrigger.triggered.connect(self.delete_project_)
         self.exportTxtTrigger.triggered.connect(self.export_txt)
         self.exitToolButton.clicked.connect(self.close)
@@ -140,14 +141,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     # TODO: полагаю имя проекта передавать надо не сюда, оно предается сингалом
     @QtCore.pyqtSlot()
-    def open_project(self, project_name='Hello'):
-        open_project_dialog = OpenProjectDialogWindow(self)
-        open_project_dialog.show()
-        # возвращать имя или передавать сигналом? (сейчас сигналом)
-        # self.open_cur_project.emit(project_name)
+    def open_project_triggered(self):
+        self.get_projects_names.emit()
 
-    def delete_project_(self):
+    def open_projects(self, projects):
+        open_project_dialog = OpenProjectDialogWindow(self)
+        open_project_dialog.add_projects_list(projects)
+        open_project_dialog.show()
+
+    def delete_project_triggered(self):
+        self.delete_project.emit()
+
+    def delete_projects(self, projects):
         delete_project_dialog = DeleteProjectDialogWindow(self)
+        delete_project_dialog.add_projects_list(projects)
         delete_project_dialog.show()
 
     def resizeEvent(self, event):
