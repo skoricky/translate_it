@@ -52,7 +52,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.createTrigger.triggered.connect(self.create_new_project)
         self.openTrigger.triggered.connect(self.open_project_triggered)
-        self.deleteTrigger.triggered.connect(self.delete_project_)
+        self.deleteTrigger.triggered.connect(self.delete_project_triggered)
         self.exportTxtTrigger.triggered.connect(self.export_txt)
         self.exitToolButton.clicked.connect(self.close)
         self.saveToolButton.clicked.connect(self._save_project)
@@ -145,6 +145,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.get_projects_names.emit()
 
     def open_projects(self, projects):
+        print(projects)
         open_project_dialog = OpenProjectDialogWindow(self)
         open_project_dialog.add_projects_list(projects)
         open_project_dialog.show()

@@ -67,21 +67,25 @@ class SQLiteRepository(AbsModel):
             self.project_id = self.get_project_id()
 
     def open_project(self, project_name: str):
+        print('hi, im open project')
         self.project_name = project_name
         self.project_id = self.get_project_id()
         return self.get_data()
 
     def get_project_id(self):
+        print('hi, im get project id')
         return self.db_.get_project_id(self.project_name)
 
     def get_projects_names(self):
+        print('im here!')
         self.projects_names = self.db_.get_projects_names()
-        return self.projects_names
+        return tuple(str(i[0]) for i in self.projects_names)
 
     def get_data(self):
-        en_ = self.db_.get_few_block_en(self.project_id)
-        ru_ = self.db_.get_few_block_ru(self.project_id)
-        return tuple((en_[i], ru_[i]) for i in en_)
+        print('hi im get data for id:', self.project_id)
+        blocks = self.db_.get_all_block(self.project_id)
+        if blocks:
+            return tuple((i[0], i[1]) for i in blocks)
 
     def set_data(self, data: tuple):
         print(data)

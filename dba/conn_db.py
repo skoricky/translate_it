@@ -2,6 +2,7 @@ import sqlite3
 from os.path import abspath, join
 
 DB_PATH = join(abspath('.'), 'tiy.db')
+# DB_PATH = "D:\\Projects\\translate_it_now\\tiy.db"
 
 
 # TODO: все запросы на создание таблиц обернуть в один метот create_base, который должен запускаться в __init__
@@ -48,7 +49,7 @@ class CDataBase:
 
     def set_en_text(self, prj_id, block_id, en_text):
         try:
-            self.cursor.execute('select * from book_en where prj_id = :prj_id and block_id = :block_id}',
+            self.cursor.execute('select * from book_en where prj_id = :prj_id and block_id = :block_id',
                                 (prj_id, block_id))
             if self.cursor.fetchone():
                 self.cursor.execute('update book_en set en_text = :en_text '
@@ -79,7 +80,7 @@ class CDataBase:
     def drop_project(self, prj_id):
         self.cursor.execute('delete from local_projects where prj_id = :prj_id; '
                             'delete from book_en where prj_id = :prj_id;'
-                            'delete from book_ru where prj_id = :prj_id;', prj_id)
+                            'delete from book_ru where prj_id = :prj_id;', (prj_id,))
         self.conn.commit()
 
     def get_project_id(self, prj_name):
@@ -87,29 +88,22 @@ class CDataBase:
             self.cursor.execute('select prj_id from local_projects where prj_name = :prj_name', (prj_name,))
             fetch = tuple(self.cursor.fetchone())
             if len(fetch) > 0:
-                return fetch
+                print('id is', fetch)
+                return fetch[0]
             else:
                 return None
         except Exception as e:
             print(e)
 
-    def get_few_block_en(self, prj_id, blk_begin=None, blk_end=None):
+    def get_all_block(self, prj_id):
         try:
-            self.cursor.execute('select en_text from book_en where prj_id = :prj_id', (prj_id,))
+            self.cursor.execute('select en_text, ru_text from book_en '
+                                'left join book_ru on book_en.prj_id = book_ru.prj_id '
+                                'and book_en.block_id = book_ru.block_id '
+                                'where book_en.prj_id = :prj_id', (prj_id,))
             fetch = tuple(self.cursor.fetchall())
-            if len(fetch):
+            if len(fetch) > 0:
                 return fetch
-            else:
-                return None
-        except Exception as e:
-            print(e)
-
-    def get_few_block_ru(self, prj_id, blk_begin=None, blk_end=None):
-        try:
-            self.cursor.execute(f'select ru_text from book_ru where prj_id = :prj_id', (prj_id,))
-            fetch = tuple(self.cursor.fetchall())
-            if len(fetch):
-                return self.cursor.fetchall()
             else:
                 return None
         except Exception as e:
@@ -163,7 +157,5 @@ class CDataBase:
 
 if __name__ == '__main__':
     a = CDataBase()
-    # a.set_project('python', 'Guido', 'python.org')
     print(a.get_projects_names())
     print(a.get_project_id('python'))
-    print(a.get_few_block_en('goo'))
