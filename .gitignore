@@ -1,2 +1,5 @@
 
 *.pyc
+*.pyc
+view/ui_views/__pycache__/__init__.cpython-36.pyc
+view/ui_views/__pycache__/mainWindow.cpython-36.pyc
