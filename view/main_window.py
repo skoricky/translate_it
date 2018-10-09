@@ -8,6 +8,7 @@ from view.ui_views.mainWindow import Ui_MainWindow
 from view.ui_views.info_boxes import MessageBoxes
 from view.ui_views.create_project_dialog import CreateProjectDialogWindow
 from view.ui_views.open_project_dialog import OpenProjectDialogWindow
+from view.ui_views.delete_project_dialog import DeleteProjectDialogWindow
 
 from view.translate_api import translate
 
@@ -24,7 +25,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     load_from_file = QtCore.pyqtSignal(str)
     set_text_blocks = QtCore.pyqtSignal(tuple)
     dump_to_file = QtCore.pyqtSignal(list, str)
-    create_project = QtCore.pyqtSignal(dict)
+    create_project = QtCore.pyqtSignal(dict)  # ?
+    delete_project = QtCore.pyqtSignal(dict)  # ?
 
     def __init__(self, paren=None):
         QtWidgets.QMainWindow.__init__(self, paren)
@@ -49,10 +51,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.createTrigger.triggered.connect(self.create_new_project)
         self.openTrigger.triggered.connect(self.open_project)
+        self.deleteTrigger.triggered.connect(self.delete_project_)
         self.exportTxtTrigger.triggered.connect(self.export_txt)
         self.exitToolButton.clicked.connect(self.close)
         self.saveToolButton.clicked.connect(self._save_project)
         self.saveTrigger.triggered.connect(self._save_project)
+        self.exitTrigger.triggered.connect(self.close)
 
     def sync_translated_scroll(self, value):
         self.translatedListWidget.verticalScrollBar().setValue(value)
@@ -77,7 +81,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.workWithBlockPushButton.setEnabled(True)
         self._project_changed = True
 
-    # TODO: изменить когда будет метод выгрузки из базы
     def add_text(self, list_of_tuples):
         for o, t in list_of_tuples:
             orig_item = QtWidgets.QListWidgetItem(o, self.originalListWidget)
@@ -135,16 +138,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         create_project_dialog = CreateProjectDialogWindow(self)
         create_project_dialog.show()
 
-    # TODO: выгрузка из базы списка проектов, + поиск по проектам... список/аккардеон/дерево?
+    # TODO: полагаю имя проекта передавать надо не сюда, оно предается сингалом
     @QtCore.pyqtSlot()
     def open_project(self, project_name='Hello'):
         open_project_dialog = OpenProjectDialogWindow(self)
         open_project_dialog.show()
         # возвращать имя или передавать сигналом? (сейчас сигналом)
-        self.open_cur_project.emit(project_name)
+        # self.open_cur_project.emit(project_name)
 
-    def ppp(self, stt):
-        print(stt)
+    def delete_project_(self):
+        delete_project_dialog = DeleteProjectDialogWindow(self)
+        delete_project_dialog.show()
 
     def resizeEvent(self, event):
         """ Переопределение метода изменения размера окна,
