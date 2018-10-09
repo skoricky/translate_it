@@ -1,4 +1,7 @@
 import sqlite3
+from os.path import abspath, join
+
+DB_PATH = join(abspath('.'), 'tiy.db')
 
 
 # TODO: все запросы на создание таблиц обернуть в один метот create_base, который должен запускаться в __init__
@@ -7,7 +10,7 @@ import sqlite3
 # TODO: некоторые методы я переписал, чтобы просто опробовать связи, нужно еще раз связываться и уже допиливать
 class CDataBase:
     def __init__(self):
-        self.conn = sqlite3.connect("D:\\Projects\\translate_it_now\\tiy.db")
+        self.conn = sqlite3.connect(DB_PATH)
         self.cursor = self.conn.cursor()
 
     def create_table_local_projects(self):
