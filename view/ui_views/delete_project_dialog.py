@@ -22,4 +22,4 @@ class DeleteProjectDialogWindow(QtWidgets.QDialog, Ui_Dialog):
             self.parent().info_box('info', 'Не выбран проект', 'Выберите проект')
 
     def add_projects_list(self, projects):
-        self.openProjectListWidget.addItems(projects)
+        self.deleteProjectListWidget.addItems(projects)
