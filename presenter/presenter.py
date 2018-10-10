@@ -13,10 +13,13 @@ class Presenter(object):
         self._view.create_project.connect(self.create_project)
         self._view.get_projects_names.connect(self.get_projects_names)
 
-    def get_projects_names(self):
+    def get_projects_names(self, action):
         projects_names = self._model.get_projects_names()
         if projects_names is not None:
-            self._view.open_projects(projects_names)
+            if action == 'open':
+                self._view.open_projects(projects_names)
+            elif action == 'delete':
+                self._view.delete_projects(projects_names)
 
     def create_project(self, dict_):
         self._model.create_project(**dict_)
