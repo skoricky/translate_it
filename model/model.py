@@ -87,13 +87,15 @@ class SQLiteRepository(AbsModel):
         if blocks:
             return tuple((i[0], i[1]) for i in blocks)
 
+    # TODO: делать commit каждые 100 записей (подумать про декоратор)
     def set_data(self, data: dict):
         print('hi, im set the', data)
         for idx in data:
-            print('en', data[idx][0])
-            print('ru', data[idx][1])
+            # print('en', data[idx][0])
+            # print('ru', data[idx][1])
             self.db_.set_en_text(prj_id=self.project_id, block_id=idx, en_text=data[idx][0])
             self.db_.set_ru_text(prj_id=self.project_id, block_id=idx, ru_text=data[idx][1])
+        self.db_.make_commit()
 
     def del_project(self, project_name):
         self.db_.drop_project(self.get_project_id(project_name))
