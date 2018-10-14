@@ -49,7 +49,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.workWithBlockPushButton.clicked.connect(self.work_with_block)
         self.originalListWidget.itemDoubleClicked.connect(lambda: self.work_with_block(on_d_click=True))
-        self.translatedListWidget.itemDoubleClicked.connect(lambda: self.work_with_block(on_d_click=True))
+        self.translatedListWidget.itemDoubleClicked.connect(self.work_with_block)
 
         self.saveBlockPushButton.clicked.connect(self.save_block)
         self.translateApiPushButton.clicked.connect(self.translate_word)
