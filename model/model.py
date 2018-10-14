@@ -63,8 +63,8 @@ class SQLiteRepository(AbsModel):
         self.db_.set_project(prj_name=kwargs['project_name'],
                              author=kwargs['author_name'],
                              link_original=kwargs['source_link'])
-        if self.get_project_id() is not None:
-            self.project_id = self.get_project_id()
+        if self.get_project_id(self.project_name) is not None:
+            self.project_id = self.get_project_id(self.project_name)
 
     def open_project(self, project_name: str):
         print('hi, im open project')

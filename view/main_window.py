@@ -210,6 +210,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 changes_dict[i] = (self.originalListWidget.item(i).text(), self.translatedListWidget.item(i).text())
             self.set_text_blocks.emit(changes_dict)
             self._project_changed = False
+            self._set_of_changed_blocks.clear()
 
         elif not self._project_changed:
             for i in range(self.translatedListWidget.count()):
@@ -217,6 +218,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.set_text_blocks.emit(changes_dict)
             self._project_changed = False
 
+import sys
+sys._excepthook = sys.excepthook
+def my_exception_hook(exctype, value, traceback):
+    # Print the error and traceback
+    print(exctype, value, traceback)
+    # Call the normal Exception hook after
+    sys._excepthook(exctype, value, traceback)
+    sys.exit(1)
+# Set the exception hook to our wrapping function
+sys.excepthook = my_exception_hook
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
