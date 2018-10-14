@@ -20,10 +20,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         Ui_MainWindow - форма для setupUi"""
     _current_block = None
     _project_changed = False  # при нажатии на save или auto-save меняется на False
+    _set_of_changed_blocks = set()
 
     open_cur_project = QtCore.pyqtSignal(str)
     load_from_file = QtCore.pyqtSignal(str)
-    set_text_blocks = QtCore.pyqtSignal(tuple)
+    set_text_blocks = QtCore.pyqtSignal(dict)
     dump_to_file = QtCore.pyqtSignal(list, str)
     create_project = QtCore.pyqtSignal(dict)
     delete_project = QtCore.pyqtSignal(str)
@@ -55,8 +56,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.deleteTrigger.triggered.connect(self.delete_project_triggered)
         self.exportTxtTrigger.triggered.connect(self.export_txt)
         self.exitToolButton.clicked.connect(self.close)
-        self.saveToolButton.clicked.connect(self.save_project)
-        self.saveTrigger.triggered.connect(self.save_project)
+        self.saveToolButton.clicked.connect(self.auto_save)
+        self.saveTrigger.triggered.connect(self.auto_save)
         self.exitTrigger.triggered.connect(self.close)
 
     def sync_translated_scroll(self, value):
@@ -81,6 +82,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.translatedPartStackedWidget.setCurrentWidget(self.listPage)
         self.workWithBlockPushButton.setEnabled(True)
         self._project_changed = True
+        self._set_of_changed_blocks.add(self._current_block)
 
     def add_text(self, list_of_tuples):
         for o, t in list_of_tuples:
@@ -202,11 +204,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.save_project()
 
     def save_project(self):
-        text = ((self.originalListWidget.item(i).text(), self.translatedListWidget.item(i).text())
-                for i in range(self.translatedListWidget.count()))
+        changes_dict = {}
+        if self._set_of_changed_blocks:
+            for i in self._set_of_changed_blocks:
+                changes_dict[i] = (self.originalListWidget.item(i).text(), self.translatedListWidget.item(i).text())
+            self.set_text_blocks.emit(changes_dict)
+            self._project_changed = False
 
-        self.set_text_blocks.emit(tuple(text))
-        self._project_changed = False
+        elif not self._project_changed:
+            for i in range(self.translatedListWidget.count()):
+                changes_dict[i] = (self.originalListWidget.item(i).text(), self.translatedListWidget.item(i).text())
+            self.set_text_blocks.emit(changes_dict)
+            self._project_changed = False
 
 
 if __name__ == '__main__':
