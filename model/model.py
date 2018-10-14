@@ -32,7 +32,7 @@ class AbsModel:
 
     def dumpto_file(self):
         try:
-            with open(self.file_name, 'w') as file:
+            with open(self.file_name, 'w', encoding='utf-8') as file:
                 file.write(self.data)
         except Exception as e:
             print('Error (so bad):', e)
