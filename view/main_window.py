@@ -38,7 +38,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.autosave_timer = QtCore.QTimer(self)
         self.autosave_timer.setTimerType(QtCore.Qt.VeryCoarseTimer)
         self.autosave_timer.start(AUTO_SAVE_TIMEOUT)
-        self.autosave_timer.timeout.connect(self._save_project)
+        self.autosave_timer.timeout.connect(self.auto_save)
 
         self.originalListWidget.itemClicked.connect(self.original_list_click)
         self.translatedListWidget.itemClicked.connect(self.translated_list_click)
@@ -196,6 +196,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def showEvent(self, event):
         self.align_text_blocks_height()
         event.accept()
+
+    def auto_save(self):
+        if self._project_changed:
+            self._save_project()
 
     def _save_project(self):
         text = ((self.originalListWidget.item(i).text(), self.translatedListWidget.item(i).text())
