@@ -26,7 +26,7 @@ class Presenter(object):
     def create_project(self, dict_):
         self._model.create_project(**dict_)
         self.loadfrom_file(dict_['file_path'])
-        if dict_['project_name'] == self._model.project_name:
+        if self._model.get_projects_id(dict_['project_name']):
             self._view.save_project()
 
     def get_blocks(self, data: tuple):
