@@ -25,6 +25,8 @@ class Presenter(object):
     def create_project(self, dict_):
         self._model.create_project(**dict_)
         self.loadfrom_file(dict_['file_path'])
+        if self._model.get_project_id() is not None:
+            self._view.save_project()
 
     def get_blocks(self, data: tuple):
         self._view.add_text(data)

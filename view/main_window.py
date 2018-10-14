@@ -55,8 +55,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.deleteTrigger.triggered.connect(self.delete_project_triggered)
         self.exportTxtTrigger.triggered.connect(self.export_txt)
         self.exitToolButton.clicked.connect(self.close)
-        self.saveToolButton.clicked.connect(self._save_project)
-        self.saveTrigger.triggered.connect(self._save_project)
+        self.saveToolButton.clicked.connect(self.save_project)
+        self.saveTrigger.triggered.connect(self.save_project)
         self.exitTrigger.triggered.connect(self.close)
 
     def sync_translated_scroll(self, value):
@@ -179,7 +179,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 return False
 
             elif answ == QtWidgets.QMessageBox.Yes:
-                self._save_project()
+                self.save_project()
                 self.clear_project()
                 return True
 
@@ -199,9 +199,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def auto_save(self):
         if self._project_changed:
-            self._save_project()
+            self.save_project()
 
-    def _save_project(self):
+    def save_project(self):
         text = ((self.originalListWidget.item(i).text(), self.translatedListWidget.item(i).text())
                 for i in range(self.translatedListWidget.count()))
 

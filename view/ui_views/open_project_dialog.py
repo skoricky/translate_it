@@ -23,4 +23,5 @@ class OpenProjectDialogWindow(QtWidgets.QDialog, Ui_Dialog):
             self.parent().info_box('info', 'Не выбран проект', 'Выберите проект')
 
     def add_projects_list(self, projects):
+        print('im finally here')
         self.openProjectListWidget.addItems(projects)

@@ -98,6 +98,7 @@ class SQLiteRepository(AbsModel):
     def del_project(self, project_name):
         self.db_.drop_project(self.db_.get_project_id(project_name))
 
+
 class TempRepository(AbsModel):
 
     __slots__ = ['file_name', 'data']
