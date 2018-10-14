@@ -69,12 +69,12 @@ class SQLiteRepository(AbsModel):
     def open_project(self, project_name: str):
         print('hi, im open project')
         self.project_name = project_name
-        self.project_id = self.get_project_id()
+        self.project_id = self.get_project_id(self.project_name)
         return self.get_data()
 
-    def get_project_id(self):
+    def get_project_id(self, project_name):
         print('hi, im get project id')
-        return self.db_.get_project_id(self.project_name)
+        return self.db_.get_project_id(project_name)
 
     def get_projects_names(self):
         print('im here!')
@@ -87,16 +87,16 @@ class SQLiteRepository(AbsModel):
         if blocks:
             return tuple((i[0], i[1]) for i in blocks)
 
-    def set_data(self, data: tuple):
-        print(data)
-        for idx, i in enumerate(data):
-            print('en', i[0])
-            print('ru', i[1])
-            self.db_.set_en_text(prj_id=self.project_id, block_id=idx, en_text=i[0])
-            self.db_.set_ru_text(prj_id=self.project_id, block_id=idx, ru_text=i[1])
+    def set_data(self, data: dict):
+        print('hi, im set the', data)
+        for idx in data:
+            print('en', data[idx][0])
+            print('ru', data[idx][1])
+            self.db_.set_en_text(prj_id=self.project_id, block_id=idx, en_text=data[idx][0])
+            self.db_.set_ru_text(prj_id=self.project_id, block_id=idx, ru_text=data[idx][1])
 
     def del_project(self, project_name):
-        self.db_.drop_project(self.db_.get_project_id(project_name))
+        self.db_.drop_project(self.get_project_id(project_name))
 
 
 class TempRepository(AbsModel):
